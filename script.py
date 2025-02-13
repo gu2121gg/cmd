@@ -1,10 +1,7 @@
-import tkinter as tk
-from tkinter import messagebox
+import webbrowser
 
-def show_success():
-    root = tk.Tk()
-    root.withdraw()  # Oculta a janela principal
-    messagebox.showinfo("Sucesso", "Download e Execução bem-sucedidos! 🐸")
+# Link que você quer abrir
+url = "https://www.youtube.com/watch?v=5ceevGlzBCo"
 
-if __name__ == "__main__":
-    show_success()
+# Abre o link no navegador padrão
+webbrowser.open(url)
