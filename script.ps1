@@ -1,31 +1,37 @@
-$repoUrl = "https://github.com/gu2121gg/cmd/archive/refs/heads/main.zip"; # URL direta para o ZIP do seu repositório
-$destinationFolder = ".\cmd_repo_download"; # Pasta onde o repositório será extraído (no diretório atual)
-$tempZipFile = Join-Path $env:TEMP "cmd_repo_temp.zip"; # Caminho para o arquivo ZIP temporário
+# Este script é para fins educacionais e de teste APENAS.
+# Ele simula um comportamento "de vírus" abrindo várias janelas do CMD com texto verde.
+# ELE NÃO CAUSA NENHUM DANO REAL AO SEU SISTEMA.
 
-# Cria a pasta de destino se ela não existir, forçando a criação se necessário
-New-Item -ItemType Directory -Force -Path $destinationFolder | Out-Null;
+Write-Host "Iniciando simulação de 'instalação de vírus' (apenas para teste)..." -ForegroundColor Yellow
 
-Write-Host "Iniciando download e extração do repositório GitHub...";
+# Número de janelas CMD a serem abertas
+$numCmdWindows = 10;
 
-try {
-    # Baixa o arquivo ZIP do repositório. Out-Null evita output desnecessário.
-    Invoke-WebRequest -Uri $repoUrl -OutFile $tempZipFile -ErrorAction Stop | Out-Null;
-
-    Write-Host "Arquivo ZIP baixado. Extraindo conteúdo...";
-
-    # Extrai o conteúdo do ZIP para a pasta de destino. O parâmetro -Force sobrescreve se existir.
-    Expand-Archive -Path $tempZipFile -DestinationPath $destinationFolder -Force -ErrorAction Stop;
-
-    Write-Host "Conteúdo extraído. Limpando arquivos temporários...";
-
-    # Remove o arquivo ZIP temporário. SilentlyContinue evita erros se o arquivo já não existir.
-    Remove-Item -Path $tempZipFile -Force -ErrorAction SilentlyContinue | Out-Null;
-
-    # Exibe o caminho completo onde os arquivos foram extraídos
-    Write-Host "Download e extração concluídos com sucesso em: $(Resolve-Path $destinationFolder)";
-
-} catch {
-    Write-Error "Ocorreu um erro durante o processo: $($_.Exception.Message)";
-    # Se houver um erro, tenta limpar o ZIP temporário
-    if (Test-Path $tempZipFile) { Remove-Item -Path $tempZipFile -Force -ErrorAction SilentlyContinue | Out-Null; }
+# Tentar encontrar o caminho para cmd.exe
+$cmdPath = "$env:SystemRoot\System32\cmd.exe"
+if (-not (Test-Path $cmdPath)) {
+    Write-Warning "cmd.exe não encontrado em $cmdPath. Tentando PATH...";
+    $cmdPath = (Get-Command cmd.exe).Path
 }
+
+if (-not (Test-Path $cmdPath)) {
+    Write-Error "Não foi possível localizar cmd.exe. Abortando simulação."
+    return
+}
+
+for ($i = 1; $i -le $numCmdWindows; $i++) {
+    # Comando para abrir um CMD com fundo preto e texto verde, e exibir uma mensagem
+    # O ping -n 3 127.0.0.1 > nul mantém a janela aberta por 3 segundos antes de fechar automaticamente
+    $cmdArguments = "/c color 0a & echo Acessando o sistema... & echo Processando dados... & echo Instalacao em andamento... & ping -n 3 127.0.0.1 > nul & exit";
+    
+    try {
+        # Para que as janelas apareçam e fiquem visíveis por um tempo:
+        Start-Process -FilePath $cmdPath -ArgumentList $cmdArguments;
+        Start-Sleep -Milliseconds 100; # Pequeno atraso para as janelas abrirem em sequência
+    } catch {
+        Write-Warning "Falha ao abrir janela CMD número $i: $($_.Exception.Message)";
+    }
+}
+
+Write-Host "Simulação concluída. Nenhuma modificação prejudicial foi feita." -ForegroundColor Green
+            
