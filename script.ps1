@@ -29,7 +29,8 @@ for ($i = 1; $i -le $numCmdWindows; $i++) {
         Start-Process -FilePath $cmdPath -ArgumentList $cmdArguments;
         Start-Sleep -Milliseconds 100; # Pequeno atraso para as janelas abrirem em sequência
     } catch {
-        Write-Warning "Falha ao abrir janela CMD número $i: $($_.Exception.Message)";
+        # Correção: Envolva a variável $i em ${} para evitar erro de referência inválida
+        Write-Warning "Falha ao abrir janela CMD número ${i}: $($_.Exception.Message)"; 
     }
 }
 
