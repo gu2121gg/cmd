@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repositório CMD - Scripts</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: opacity ease-in 0.2s;
+        }
+        body[unresolved] {
+            opacity: 0;
+            display: block;
+            overflow: hidden;
+            position: relative;
+        }
+        .container {
+            max-width: 800px;
+        }
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            white-space: pre-wrap; /* Quebra linhas longas */
+            word-wrap: break-word; /* Quebra palavras longas */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 p-8 unresolved">
+    <div class="container mx-auto bg-white shadow-lg rounded-xl p-8 my-8">
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl font-bold text-blue-700 mb-4 rounded-xl">
+                <span class="inline-block p-2 bg-blue-100 rounded-lg">Repositório CMD - Scripts</span>
+            </h1>
+            <p class="text-xl text-gray-600">
+                Este site hospeda scripts PowerShell para download e execução.
+            </p>
+            <hr class="my-6 border-blue-200">
+        </header>
+
+        <section class="mb-8">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Como Funciona:</h2>
+            <p class="mb-4 text-lg">
+                Este script PowerShell automatiza o download e a extração dos arquivos do repositório GitHub para o seu computador.
+            </p>
+            <p class="mb-4 text-lg">
+                Para executar o script diretamente no seu sistema, abra o <strong>Prompt de Comando (CMD)</strong> ou <strong>PowerShell</strong> e cole o comando abaixo:
+            </p>
+            <div class="bg-gray-200 p-4 rounded-lg mb-4 text-sm font-mono break-words">
+                <code id="command-to-copy">
+                    powershell -c "iwr https://raw.githubusercontent.com/gu2121gg/cmd/main/script.ps1 | iex"
+                </code>
+                <button onclick="copyCommand()" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-300 ease-in-out">
+                    Copiar Comando
+                </button>
+            </div>
+            <p class="text-red-600 text-lg font-semibold">
+                ⚠️ **Atenção:** Ao executar scripts da internet, sempre verifique o conteúdo para garantir a segurança. Este script é fornecido como exemplo e deve ser usado com cautela.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Conteúdo do Script PowerShell (`script.ps1`):</h2>
+            <pre>
+$repoUrl = "https://github.com/gu2121gg/cmd/archive/refs/heads/main.zip"; # URL direta para o ZIP do seu repositório
+$destinationFolder = ".\cmd_repo_download"; # Pasta onde o repositório será extraído (no diretório atual)
+$tempZipFile = Join-Path $env:TEMP "cmd_repo_temp.zip"; # Caminho para o arquivo ZIP temporário
+
+# Cria a pasta de destino se ela não existir, forçando a criação se necessário
+New-Item -ItemType Directory -Force -Path $destinationFolder | Out-Null;
+
+Write-Host "Iniciando download e extração do repositório GitHub...";
+
+try {
+    # Baixa o arquivo ZIP do repositório. Out-Null evita output desnecessário.
+    Invoke-WebRequest -Uri $repoUrl -OutFile $tempZipFile -ErrorAction Stop | Out-Null;
+
+    Write-Host "Arquivo ZIP baixado. Extraindo conteúdo...";
+
+    # Extrai o conteúdo do ZIP para a pasta de destino. O parâmetro -Force sobrescreve se existir.
+    Expand-Archive -Path $tempZipFile -DestinationPath $destinationFolder -Force -ErrorAction Stop;
+
+    Write-Host "Conteúdo extraído. Limpando arquivos temporários...";
+
+    # Remove o arquivo ZIP temporário. SilentlyContinue evita erros se o arquivo já não existir.
+    Remove-Item -Path $tempZipFile -Force -ErrorAction SilentlyContinue | Out-Null;
+
+    # --- Nova funcionalidade: Abrir index.html ---
+    # Nota: Este script PowerShell está embutido em um HTML e o objetivo é que ele baixe e extraia
+    # o conteúdo do seu repositório. A funcionalidade de "abrir index.html" abaixo se refere a
+    # tentar abrir um index.html *dentro do conteúdo baixado*, não o HTML que hospeda este script.
+    $extractedContentPath = Get-ChildItem -Path $destinationFolder -Directory | Where-Object { $_.Name -like "cmd-main*" }; # Ajustado para encontrar a pasta extraída (geralmente 'cmd-main')
+
+    if ($extractedContentPath) {
+        $indexPath = Join-Path $extractedContentPath.FullName "index.html";
+        if (Test-Path $indexPath) {
+            Write-Host "Abrindo index.html no navegador...";
+            Start-Process $indexPath; # Abre o arquivo no programa padrão (navegador para .html)
+        } else {
+            Write-Warning "index.html não encontrado na pasta extraída: $extractedContentPath.FullName";
+        }
+    } else {
+        Write-Warning "Não foi possível localizar a pasta do repositório extraída em: $destinationFolder";
+    }
+    # --- Fim da nova funcionalidade ---
+
+    Write-Host "Processo concluído.";
+
+} catch {
+    Write-Error "Ocorreu um erro durante o processo: $($_.Exception.Message)";
+    # Se houver um erro, tenta limpar o ZIP temporário
+    if (Test-Path $tempZipFile) { Remove-Item -Path $tempZipFile -Force -ErrorAction SilentlyContinue | Out-Null; }
+}
+            </pre>
+        </section>
+
+        <footer class="mt-8 text-center text-gray-500 text-sm">
+            <p>&copy; 2025 Seu Nome/Projeto. Todos os direitos reservados.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Remove a opacidade inicial quando a página é carregada
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.removeAttribute('unresolved');
+        });
+
+        // Função para copiar o comando
+        function copyCommand() {
+            const commandText = document.getElementById('command-to-copy').innerText;
+            const tempInput = document.createElement('textarea'); // Usar textarea para compatibilidade
+            tempInput.value = commandText;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy'); // Método antigo mas mais compatível em iframes
+            document.body.removeChild(tempInput);
+            alert('Comando copiado para a área de transferência!'); // Substituir por modal em apps reais
+        }
+    </script>
+</body>
+</html>
