@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Repositório CMD - Scripts</title>
+    <title>Repositório CMD - Simulação de Vírus (Educacional)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -34,10 +34,10 @@
     <div class="container mx-auto bg-white shadow-lg rounded-xl p-8 my-8">
         <header class="mb-8 text-center">
             <h1 class="text-4xl font-bold text-blue-700 mb-4 rounded-xl">
-                <span class="inline-block p-2 bg-blue-100 rounded-lg">Repositório CMD - Scripts</span>
+                <span class="inline-block p-2 bg-blue-100 rounded-lg">Simulação de 'Vírus' (Educacional)</span>
             </h1>
             <p class="text-xl text-gray-600">
-                Este site hospeda scripts PowerShell para download e execução.
+                Este site hospeda um script PowerShell para fins de teste e demonstração.
             </p>
             <hr class="my-6 border-blue-200">
         </header>
@@ -45,10 +45,12 @@
         <section class="mb-8">
             <h2 class="text-2xl font-semibold text-gray-800 mb-4">Como Funciona:</h2>
             <p class="mb-4 text-lg">
-                Este script PowerShell automatiza o download e a extração dos arquivos do repositório GitHub para o seu computador.
+                O script abaixo **simula** a instalação de um 'vírus' abrindo várias janelas do Prompt de Comando (CMD) com texto verde.
+                **Este script é TOTALMENTE SEGURO para fins educacionais e de teste.**
+                Ele não instala software malicioso, não danifica seu sistema, nem modifica arquivos ou configurações.
             </p>
             <p class="mb-4 text-lg">
-                Para executar o script diretamente no seu sistema, abra o <strong>Prompt de Comando (CMD)</strong> ou <strong>PowerShell</strong> e cole o comando abaixo:
+                Para executar a simulação, abra o <strong>Prompt de Comando (CMD)</strong> ou <strong>PowerShell</strong> e cole o comando abaixo:
             </p>
             <div class="bg-gray-200 p-4 rounded-lg mb-4 text-sm font-mono break-words">
                 <code id="command-to-copy">
@@ -59,62 +61,49 @@
                 </button>
             </div>
             <p class="text-red-600 text-lg font-semibold">
-                ⚠️ **Atenção:** Ao executar scripts da internet, sempre verifique o conteúdo para garantir a segurança. Este script é fornecido como exemplo e deve ser usado com cautela.
+                ⚠️ **Atenção:** Embora este script seja seguro e educacional, o conceito de executar scripts da internet com `iex` é perigoso em ambientes reais. Sempre verifique o conteúdo de qualquer script antes de executá-lo.
             </p>
         </section>
 
         <section>
             <h2 class="text-2xl font-semibold text-gray-800 mb-4">Conteúdo do Script PowerShell (`script.ps1`):</h2>
             <pre>
-$repoUrl = "https://github.com/gu2121gg/cmd/archive/refs/heads/main.zip"; # URL direta para o ZIP do seu repositório
-$destinationFolder = ".\cmd_repo_download"; # Pasta onde o repositório será extraído (no diretório atual)
-$tempZipFile = Join-Path $env:TEMP "cmd_repo_temp.zip"; # Caminho para o arquivo ZIP temporário
+# Este script é para fins educacionais e de teste APENAS.
+# Ele simula um comportamento "de vírus" abrindo várias janelas do CMD com texto verde.
+# ELE NÃO CAUSA NENHUM DANO REAL AO SEU SISTEMA.
 
-# Cria a pasta de destino se ela não existir, forçando a criação se necessário
-New-Item -ItemType Directory -Force -Path $destinationFolder | Out-Null;
+Write-Host "Iniciando simulação de 'instalação de vírus' (apenas para teste)..." -ForegroundColor Yellow
 
-Write-Host "Iniciando download e extração do repositório GitHub...";
+# Número de janelas CMD a serem abertas
+$numCmdWindows = 10;
 
-try {
-    # Baixa o arquivo ZIP do repositório. Out-Null evita output desnecessário.
-    Invoke-WebRequest -Uri $repoUrl -OutFile $tempZipFile -ErrorAction Stop | Out-Null;
-
-    Write-Host "Arquivo ZIP baixado. Extraindo conteúdo...";
-
-    # Extrai o conteúdo do ZIP para a pasta de destino. O parâmetro -Force sobrescreve se existir.
-    Expand-Archive -Path $tempZipFile -DestinationPath $destinationFolder -Force -ErrorAction Stop;
-
-    Write-Host "Conteúdo extraído. Limpando arquivos temporários...";
-
-    # Remove o arquivo ZIP temporário. SilentlyContinue evita erros se o arquivo já não existir.
-    Remove-Item -Path $tempZipFile -Force -ErrorAction SilentlyContinue | Out-Null;
-
-    # --- Nova funcionalidade: Abrir index.html ---
-    # Nota: Este script PowerShell está embutido em um HTML e o objetivo é que ele baixe e extraia
-    # o conteúdo do seu repositório. A funcionalidade de "abrir index.html" abaixo se refere a
-    # tentar abrir um index.html *dentro do conteúdo baixado*, não o HTML que hospeda este script.
-    $extractedContentPath = Get-ChildItem -Path $destinationFolder -Directory | Where-Object { $_.Name -like "cmd-main*" }; # Ajustado para encontrar a pasta extraída (geralmente 'cmd-main')
-
-    if ($extractedContentPath) {
-        $indexPath = Join-Path $extractedContentPath.FullName "index.html";
-        if (Test-Path $indexPath) {
-            Write-Host "Abrindo index.html no navegador...";
-            Start-Process $indexPath; # Abre o arquivo no programa padrão (navegador para .html)
-        } else {
-            Write-Warning "index.html não encontrado na pasta extraída: $extractedContentPath.FullName";
-        }
-    } else {
-        Write-Warning "Não foi possível localizar a pasta do repositório extraída em: $destinationFolder";
-    }
-    # --- Fim da nova funcionalidade ---
-
-    Write-Host "Processo concluído.";
-
-} catch {
-    Write-Error "Ocorreu um erro durante o processo: $($_.Exception.Message)";
-    # Se houver um erro, tenta limpar o ZIP temporário
-    if (Test-Path $tempZipFile) { Remove-Item -Path $tempZipFile -Force -ErrorAction SilentlyContinue | Out-Null; }
+# Tentar encontrar o caminho para cmd.exe
+$cmdPath = "$env:SystemRoot\System32\cmd.exe"
+if (-not (Test-Path $cmdPath)) {
+    Write-Warning "cmd.exe não encontrado em $cmdPath. Tentando PATH...";
+    $cmdPath = (Get-Command cmd.exe).Path
 }
+
+if (-not (Test-Path $cmdPath)) {
+    Write-Error "Não foi possível localizar cmd.exe. Abortando simulação."
+    return
+}
+
+for ($i = 1; $i -le $numCmdWindows; $i++) {
+    # Comando para abrir um CMD com fundo preto e texto verde, e exibir uma mensagem
+    # O ping -n 3 127.0.0.1 > nul mantém a janela aberta por 3 segundos antes de fechar automaticamente
+    $cmdArguments = "/c color 0a & echo Acessando o sistema... & echo Processando dados... & echo Instalacao em andamento... & ping -n 3 127.0.0.1 > nul & exit";
+    
+    try {
+        # Para que as janelas apareçam e fiquem visíveis por um tempo:
+        Start-Process -FilePath $cmdPath -ArgumentList $cmdArguments;
+        Start-Sleep -Milliseconds 100; # Pequeno atraso para as janelas abrirem em sequência
+    } catch {
+        Write-Warning "Falha ao abrir janela CMD número $i: $($_.Exception.Message)";
+    }
+}
+
+Write-Host "Simulação concluída. Nenhuma modificação prejudicial foi feita." -ForegroundColor Green
             </pre>
         </section>
 
